@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Level Quiz</title>
+<style>
+  #eq-wrap{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111;background:#fff;padding:2rem 1rem;max-width:600px;margin:0 auto;box-sizing:border-box}
+  #eq-wrap *{box-sizing:border-box;margin:0;padding:0}
+  #eq-wrap #eq-progress-bg{height:3px;background:#e5e5e5;border-radius:2px;margin-bottom:2rem}
+  #eq-wrap #eq-progress{height:3px;background:#111;border-radius:2px;transition:width 0.4s ease;width:0%}
+  #eq-wrap .eq-label{font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#999;margin-bottom:0.75rem}
+  #eq-wrap .eq-qtext{font-size:17px;line-height:1.6;color:#111;margin-bottom:0.5rem}
+  #eq-wrap .eq-options{display:flex;flex-direction:column;gap:8px;margin-top:1.25rem}
+  #eq-wrap .eq-opt{padding:0.75rem 1rem;border:1px solid #ddd;border-radius:8px;cursor:pointer;font-size:15px;color:#111;background:#fff;transition:border-color 0.15s,background 0.15s;text-align:left;width:100%}
+  #eq-wrap .eq-opt:hover{border-color:#aaa;background:#f9f9f9}
+  #eq-wrap .eq-opt.eq-correct{border-color:#1D9E75;background:#E1F5EE;color:#085041}
+  #eq-wrap .eq-opt.eq-wrong{border-color:#D85A30;background:#FAECE7;color:#4A1B0C}
+  #eq-wrap .eq-opt:disabled{cursor:default;pointer-events:none}
+  #eq-wrap .eq-expl{margin-top:1rem;padding:0.85rem 1rem;border-radius:8px;font-size:14px;line-height:1.6;display:none}
+  #eq-wrap .eq-expl.eq-correct{background:#E1F5EE;color:#085041;border:1px solid #5DCAA5}
+  #eq-wrap .eq-expl.eq-wrong{background:#FAECE7;color:#4A1B0C;border:1px solid #F0997B}
+  #eq-wrap .eq-expl-head{font-weight:600;margin-bottom:0.3rem;font-size:13px;text-transform:uppercase;letter-spacing:0.06em;opacity:0.7}
+  #eq-wrap #eq-next{margin-top:1.25rem;padding:0.65rem 1.5rem;border:1px solid #ccc;border-radius:8px;background:transparent;color:#111;font-size:14px;cursor:pointer;display:none}
+  #eq-wrap #eq-next:hover{background:#f5f5f5}
+  #eq-wrap .eq-reading{font-size:14px;line-height:1.7;color:#555;padding:1rem;border:1px solid #e5e5e5;border-radius:8px;margin-bottom:1.25rem}
+  #eq-wrap .eq-divider{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#aaa;margin:2rem 0 1rem;padding-bottom:0.5rem;border-bottom:1px solid #e5e5e5}
+  #eq-wrap #eq-result{display:none;padding:1rem 0}
+  #eq-wrap .eq-badge{font-size:48px;font-weight:600;letter-spacing:-0.02em;color:#111;line-height:1}
+  #eq-wrap .eq-levelname{font-size:16px;color:#666;margin-top:0.25rem;margin-bottom:0.5rem}
+  #eq-wrap .eq-desc{font-size:15px;line-height:1.7;color:#555;margin-bottom:1.5rem}
+  #eq-wrap .eq-cta{border:1px solid #ddd;border-radius:12px;padding:1.25rem;margin-bottom:2rem}
+  #eq-wrap .eq-cta p{font-size:14px;color:#555;margin-bottom:1rem}
+  #eq-wrap .eq-cta-btn{display:inline-block;padding:0.65rem 1.25rem;background:#111;color:#fff;border-radius:8px;font-size:14px;text-decoration:none}
+  #eq-wrap .eq-score{font-size:13px;color:#aaa;margin-bottom:1.5rem}
+  #eq-wrap #eq-rev-toggle{background:none;border:1px solid #ddd;border-radius:8px;padding:0.6rem 1.1rem;font-size:14px;color:#666;cursor:pointer;margin-bottom:1.5rem}
+  #eq-wrap #eq-rev-toggle:hover{background:#f5f5f5}
+  #eq-wrap #eq-rev-list{display:none}
+  #eq-wrap .eq-rev-item{padding:1rem 0;border-bottom:1px solid #f0f0f0}
+  #eq-wrap .eq-rev-item:last-child{border-bottom:none}
+  #eq-wrap .eq-rev-q{font-size:14px;color:#111;margin-bottom:0.5rem;line-height:1.5}
+  #eq-wrap .eq-rev-tag{font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:#aaa;margin-bottom:0.3rem}
+  #eq-wrap .eq-rev-ans{font-size:13px;padding:0.4rem 0.75rem;border-radius:8px;margin-top:0.3rem;display:inline-block}
+  #eq-wrap .eq-rev-c{background:#E1F5EE;color:#085041}
+  #eq-wrap .eq-rev-w{background:#FAECE7;color:#4A1B0C}
+  #eq-wrap .eq-rev-lbl{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;margin-right:4px;opacity:0.7}
+  #eq-wrap .eq-tick{color:#1D9E75;margin-right:4px}
+  #eq-wrap .eq-cross{color:#D85A30;margin-right:4px}
+  #eq-wrap .eq-rev-passage{font-size:13px;color:#aaa;font-style:italic;padding:0.6rem 0.75rem;border-left:2px solid #e5e5e5;margin-bottom:0.5rem;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="eq-wrap">
+  <div id="eq-progress-bg"><div id="eq-progress"></div></div>
+  <div id="eq-qa"></div>
+  <button id="eq-next">Next →</button>
+  <div id="eq-result"></div>
+</div>
+<script>
+var EQ = (function(){
+  var questions = [
+    {s:"Grammar",t:"Choose the correct sentence.",o:["She suggested to go to the cinema.","She suggested going to the cinema.","She suggested that we go to cinema.","She suggested us to go to the cinema."],a:1,ec:"Correct. 'Suggest' is followed by a gerund (verb + -ing), never by 'to + infinitive'.",ew:"'Suggest' is always followed by a gerund (-ing form) or a 'that' clause — never by 'to + infinitive'. <em>She suggested going</em> or <em>She suggested that we go</em> are both valid patterns."},
+    {s:"Grammar",t:"Complete the sentence: By the time we arrived, the film _______.",o:["has already started","already started","had already started","was already starting"],a:2,ec:"Correct. 'By the time' with a past reference signals the past perfect — the film finished before another past event.",ew:"'By the time we arrived' shows two past events, one before the other. The earlier one needs the past perfect: <em>had already started</em>. Simple past ignores the sequence; present perfect can't be used for finished past situations."},
+    {s:"Grammar",t:"Which sentence is correct?",o:["I'm used to wake up early.","I used to waking up early.","I'm used to waking up early.","I used to woke up early."],a:2,ec:"Correct. 'Be used to' expresses familiarity and is always followed by a noun or gerund (-ing).",ew:"Two structures are often confused here. <em>Used to + infinitive</em> = a past habit (I used to wake up early). <em>Be used to + gerund</em> = familiarity (I'm used to waking up early — it doesn't bother me). Only option C follows the correct pattern."},
+    {s:"Grammar",t:"Choose the correct option: She ___ have left — her coat is still here.",o:["couldn't","mustn't","shouldn't","wouldn't"],a:0,ec:"Correct. 'Couldn't have + past participle' expresses a logical deduction that something was impossible — the evidence (her coat) proves she didn't leave.",ew:"When we use evidence to deduce that something was impossible, we use <em>couldn't have + past participle</em>. 'Mustn't' expresses prohibition. 'Shouldn't' expresses expectation. Only 'couldn't' fits logical impossibility here."},
+    {s:"Grammar",t:"Which sentence expresses that the activity wasn't done by you?",o:["I cut my hair yesterday.","I had my hair cut yesterday.","I was cutting my hair yesterday.","My hair was cut by me."],a:1,ec:"Correct. 'I had my hair cut' uses the passive causative (have + object + past participle), meaning someone else did it for you.",ew:"The passive causative is <em>have + object + past participle</em>. It means someone else did it for you. 'I cut my hair' means you did it yourself. 'My hair was cut by me' is grammatically passive but still says you did it."},
+    {s:"Grammar",t:"Complete the sentence: _______ hard he tried, he couldn't open the door.",o:["However","Whatever","Whenever","Wherever"],a:0,ec:"Correct. 'However' before an adjective or adverb means 'no matter how' — a concessive clause.",ew:"'However' + adjective/adverb means 'no matter how'. <em>However hard he tried</em> = no matter how hard he tried. 'Whatever' relates to things, 'whenever' to time, 'wherever' to place — none fit here."},
+    {s:"Vocabulary",t:"Choose the word that fits: The company decided to ___ the product launch until next year.",o:["delay","refuse","avoid","prevent"],a:0,ec:"Correct. 'Delay' means to push something to a later time, which fits perfectly with 'until next year'.",ew:"'Delay' means to move something to a later time. 'Refuse' means to say no. 'Avoid' means to stay away from something. 'Prevent' means to stop something altogether — not to reschedule it."},
+    {s:"Vocabulary",t:"What does 'a double-edged sword' mean?",o:["a very sharp argument","something with both advantages and disadvantages","a dangerous weapon","a complicated decision"],a:1,ec:"Correct. A double-edged sword cuts both ways — something with both benefits and drawbacks at the same time.",ew:"This idiom comes from a sword with two sharp edges — it can cut in both directions. It describes anything with both positive and negative consequences. E.g. <em>Social media is a double-edged sword for businesses.</em>"},
+    {s:"Vocabulary",t:"Choose the best word: Her ___ response to criticism impressed everyone in the meeting.",o:["measured","calculated","deliberate","considered"],a:0,ec:"Correct. 'Measured' suggests a calm, controlled, and proportionate response — exactly what impresses people under pressure.",ew:"All four words relate to carefulness but have different connotations. 'Measured' implies calm control and proportion. 'Calculated' often implies cold, self-serving strategy. 'Deliberate' focuses on intent. 'Considered' is close, but 'measured' is the stronger collocation with 'response'."},
+    {s:"Vocabulary",t:"Complete: He tends to ___ the issue rather than address it directly.",o:["circle around","talk over","skirt around","pass by"],a:2,ec:"Correct. 'Skirt around' an issue means to deliberately avoid dealing with it — a natural and common collocation.",ew:"'Skirt around' means to avoid something deliberately, especially something awkward. 'Circle around' is not a standard idiom here. 'Talk over' means to discuss. 'Pass by' relates to physical movement and doesn't collocate with 'issue'."},
+    {s:"Reading",r:true,p:"Remote work has reshaped how organisations think about productivity. Early studies suggested output improved when employees worked from home, but more recent research has complicated this picture. Much depends on the nature of the work itself — tasks requiring deep focus often benefit from a quieter home environment, while collaborative or creative work may suffer without the informal exchanges that offices naturally facilitate.",t:"According to the text, which factor most influences whether remote work is productive?",o:["The number of hours worked","The type of tasks being done","The size of the organisation","The employee's home environment"],a:1,ec:"Correct. The text says 'much depends on the nature of the work itself' — the type of task is the key variable.",ew:"The text says 'much depends on the nature of the work itself' — directly matching 'the type of tasks being done'. Hours and organisation size aren't mentioned. Home environment is relevant for one task type, but not the main point."},
+    {s:"Reading",r:true,p:"Remote work has reshaped how organisations think about productivity. Early studies suggested output improved when employees worked from home, but more recent research has complicated this picture. Much depends on the nature of the work itself — tasks requiring deep focus often benefit from a quieter home environment, while collaborative or creative work may suffer without the informal exchanges that offices naturally facilitate.",t:"The word 'facilitate' (last sentence) is closest in meaning to:",o:["replace","make easier","require","describe"],a:1,ec:"Correct. 'Facilitate' means to make something easier or help it happen naturally.",ew:"'Facilitate' comes from the Latin <em>facilis</em> (easy). Here, offices <em>facilitate</em> informal exchanges — those exchanges happen more easily in an office. It doesn't mean replace, require, or describe."}
+  ];
+  var levels=[
+    {r:[0,3],code:"A2",name:"Elementary",desc:"You have a working foundation in English — everyday language and common structures are familiar, but more complex grammar and vocabulary are still developing.",cta:"Book a trial lesson and let's map out where to focus first.",btn:"Book a free trial",url:"https://caefelkeszito.com"},
+    {r:[4,6],code:"B1",name:"Intermediate",desc:"You can handle most everyday situations confidently. Your grammar is solid at this level, and you're starting to use more nuanced language — the next step is building range and accuracy.",cta:"Want to move to B2? A few months of focused work gets you there.",btn:"Book a free trial",url:"https://caefelkeszito.com"},
+    {r:[7,9],code:"B2",name:"Upper-Intermediate",desc:"You're operating at a strong independent level. Complex texts and arguments are mostly within reach. Polishing accuracy and expanding your vocabulary are the main priorities now.",cta:"If the CAE is on your radar, this is the right time to start preparing.",btn:"See the CAE course",url:"https://caefelkeszito.com"},
+    {r:[10,12],code:"C1",name:"Advanced",desc:"You're working at an advanced level — nuance, inference, and complex structures are handled well. You may be ready for the CAE exam or working towards C2.",cta:"You look like a strong candidate for the CAE course.",btn:"See the CAE course",url:"https://caefelkeszito.com"}
+  ];
+  var cur=0,score=0,answered=false,ua=[];
+  var qa=document.getElementById('eq-qa');
+  var nb=document.getElementById('eq-next');
+  var pb=document.getElementById('eq-progress');
+  var rw=document.getElementById('eq-result');
+
+  function showQ(){
+    if(cur>=questions.length){showResult();return;}
+    var q=questions[cur];
+    answered=false;
+    nb.style.display='none';
+    pb.style.width=Math.round((cur/questions.length)*100)+'%';
+    var h='';
+    if(q.r){h+='<div class="eq-divider">Reading</div><div class="eq-reading">'+q.p+'</div>';}
+    else{h+='<div class="eq-divider">'+q.s+'</div>';}
+    h+='<div class="eq-label">Question '+(cur+1)+' of '+questions.length+'</div>';
+    h+='<div class="eq-qtext">'+q.t+'</div>';
+    h+='<div class="eq-options">';
+    q.o.forEach(function(o,i){h+='<button class="eq-opt" onclick="EQ.choose('+i+')">'+o+'</button>';});
+    h+='</div><div class="eq-expl" id="eq-expl"></div>';
+    qa.innerHTML=h;
+  }
+
+  function choose(i){
+    if(answered)return;
+    answered=true;
+    var q=questions[cur];
+    ua.push(i);
+    var opts=qa.querySelectorAll('.eq-opt');
+    opts.forEach(function(o){o.setAttribute('disabled','true');});
+    var ok=i===q.a;
+    opts[i].classList.add(ok?'eq-correct':'eq-wrong');
+    if(ok)score++;
+    else opts[q.a].classList.add('eq-correct');
+    var ex=document.getElementById('eq-expl');
+    ex.className='eq-expl '+(ok?'eq-correct':'eq-wrong');
+    ex.innerHTML='<div class="eq-expl-head">'+(ok?'✓ Correct':'✗ Not quite')+'</div>'+(ok?q.ec:q.ew);
+    ex.style.display='block';
+    nb.style.display='inline-block';
+    nb.textContent=cur<questions.length-1?'Next →':'See my result →';
+  }
+
+  nb.onclick=function(){cur++;showQ();};
+
+  function showResult(){
+    pb.style.width='100%';
+    qa.innerHTML='';
+    nb.style.display='none';
+    var lvl=levels[0];
+    for(var i=0;i<levels.length;i++){if(score>=levels[i].r[0]&&score<=levels[i].r[1]){lvl=levels[i];break;}}
+    var rev='';
+    questions.forEach(function(q,i){
+      var ans=ua[i],ok=ans===q.a;
+      rev+='<div class="eq-rev-item"><div class="eq-rev-tag">'+q.s+'</div>';
+      if(q.r)rev+='<div class="eq-rev-passage">'+q.p+'</div>';
+      rev+='<div class="eq-rev-q"><span class="'+(ok?'eq-tick':'eq-cross')+'">'+(ok?'✓':'✗')+'</span>'+q.t+'</div>';
+      if(!ok){
+        rev+='<div><span class="eq-rev-ans eq-rev-w"><span class="eq-rev-lbl">You chose: </span>'+q.o[ans]+'</span></div>';
+        rev+='<div style="margin-top:4px"><span class="eq-rev-ans eq-rev-c"><span class="eq-rev-lbl">Correct: </span>'+q.o[q.a]+'</span></div>';
+      } else {
+        rev+='<div><span class="eq-rev-ans eq-rev-c"><span class="eq-rev-lbl">Correct: </span>'+q.o[q.a]+'</span></div>';
+      }
+      rev+='</div>';
+    });
+    rw.style.display='block';
+    rw.innerHTML='<div class="eq-badge">'+lvl.code+'</div><div class="eq-levelname">'+lvl.name+'</div><div class="eq-score">'+score+' out of '+questions.length+' correct</div><div class="eq-desc" style="margin-top:1.25rem">'+lvl.desc+'</div><div class="eq-cta"><p>'+lvl.cta+'</p><a class="eq-cta-btn" href="'+lvl.url+'" target="_blank">'+lvl.btn+' →</a></div><button id="eq-rev-toggle" onclick="EQ.toggleRev()">Review all answers ↓</button><div id="eq-rev-list">'+rev+'</div>';
+  }
+
+  function toggleRev(){
+    var rl=document.getElementById('eq-rev-list');
+    var btn=document.getElementById('eq-rev-toggle');
+    var open=rl.style.display==='block';
+    rl.style.display=open?'none':'block';
+    btn.textContent=open?'Review all answers ↓':'Hide review ↑';
+  }
+
+  showQ();
+  return {choose:choose,toggleRev:toggleRev};
+})();
+</script>
+</body>
+</html>
