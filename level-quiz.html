@@ -32,6 +32,7 @@
   #eq-wrap .eq-cta{border:1px solid #ddd;border-radius:12px;padding:1.25rem;margin-bottom:2rem}
   #eq-wrap .eq-cta p{font-size:14px;color:#555;margin-bottom:1rem}
   #eq-wrap .eq-cta-btn{display:inline-block;padding:0.65rem 1.25rem;background:#111;color:#fff;border-radius:8px;font-size:14px;text-decoration:none}
+  #eq-wrap .eq-cta-btn2{display:inline-block;padding:0.65rem 1.25rem;background:transparent;color:#111;border:1px solid #111;border-radius:8px;font-size:14px;text-decoration:none}
   #eq-wrap .eq-score{font-size:13px;color:#aaa;margin-bottom:1.5rem}
   #eq-wrap #eq-rev-toggle{background:none;border:1px solid #ddd;border-radius:8px;padding:0.6rem 1.1rem;font-size:14px;color:#666;cursor:pointer;margin-bottom:1.5rem}
   #eq-wrap #eq-rev-toggle:hover{background:#f5f5f5}
@@ -75,8 +76,8 @@ var EQ = (function(){
   var levels=[
     {r:[0,3],code:"A2",name:"Elementary",desc:"You have a working foundation in English — everyday language and common structures are familiar, but more complex grammar and vocabulary are still developing.",cta:"Book a trial lesson and let's map out where to focus first.",btn:"Book a free trial",url:"https://calendly.com/eszter-arnold/english-class-50-mins"},
     {r:[4,6],code:"B1",name:"Intermediate",desc:"You can handle most everyday situations confidently. Your grammar is solid at this level, and you're starting to use more nuanced language — the next step is building range and accuracy.",cta:"Want to move to B2? A few months of focused work gets you there.",btn:"Book a free trial",url:"https://calendly.com/eszter-arnold/english-class-50-mins"},
-    {r:[7,9],code:"B2",name:"Upper-Intermediate",desc:"You're operating at a strong independent level. Complex texts and arguments are mostly within reach. Polishing accuracy and expanding your vocabulary are the main priorities now.",cta:"If the CAE is on your radar, this is the right time to start preparing.",btn:"See the CAE course",url:"https://caefelkeszito.com"},
-    {r:[10,12],code:"C1",name:"Advanced",desc:"You're working at an advanced level — nuance, inference, and complex structures are handled well. You may be ready for the CAE exam or working towards C2.",cta:"You look like a strong candidate for the CAE course.",btn:"See the CAE course",url:"https://caefelkeszito.com"}
+    {r:[7,9],code:"B2",name:"Upper-Intermediate",desc:"You're operating at a strong independent level. Complex texts and arguments are mostly within reach. Polishing accuracy and expanding your vocabulary are the main priorities now.",cta:"If the CAE is on your radar, this is the right time to start preparing.",btn:"See the CAE course",url:"https://caefelkeszito.com",btn2:"Sign up for the course",url2:"https://buy.stripe.com/6oU5kCeUC9Vv3OIgpi6wE02"},
+    {r:[10,12],code:"C1",name:"Advanced",desc:"You're working at an advanced level — nuance, inference, and complex structures are handled well. You may be ready for the CAE exam or working towards C2.",cta:"You look like a strong candidate for the CAE course.",btn:"See the CAE course",url:"https://caefelkeszito.com",btn2:"Sign up for the course",url2:"https://buy.stripe.com/6oU5kCeUC9Vv3OIgpi6wE02"}
   ];
   var cur=0,score=0,answered=false,ua=[];
   var qa=document.getElementById('eq-qa');
@@ -143,7 +144,9 @@ var EQ = (function(){
       rev+='</div>';
     });
     rw.style.display='block';
-    rw.innerHTML='<div class="eq-badge">'+lvl.code+'</div><div class="eq-levelname">'+lvl.name+'</div><div class="eq-score">'+score+' out of '+questions.length+' correct</div><div class="eq-desc" style="margin-top:1.25rem">'+lvl.desc+'</div><div class="eq-cta"><p>'+lvl.cta+'</p><a class="eq-cta-btn" href="'+lvl.url+'" target="_blank">'+lvl.btn+' →</a></div><button id="eq-rev-toggle" onclick="EQ.toggleRev()">Review all answers ↓</button><div id="eq-rev-list">'+rev+'</div>';
+    var ctaButtons='<a class="eq-cta-btn" href="'+lvl.url+'" target="_blank">'+lvl.btn+' →</a>';
+    if(lvl.btn2){ctaButtons+=' <a class="eq-cta-btn2" href="'+lvl.url2+'" target="_blank">'+lvl.btn2+' →</a>';}
+    rw.innerHTML='<div class="eq-badge">'+lvl.code+'</div><div class="eq-levelname">'+lvl.name+'</div><div class="eq-score">'+score+' out of '+questions.length+' correct</div><div class="eq-desc" style="margin-top:1.25rem">'+lvl.desc+'</div><div class="eq-cta"><p>'+lvl.cta+'</p><div style="display:flex;gap:10px;flex-wrap:wrap">'+ctaButtons+'</div></div><button id="eq-rev-toggle" onclick="EQ.toggleRev()">Review all answers ↓</button><div id="eq-rev-list">'+rev+'</div>';
   }
 
   function toggleRev(){
